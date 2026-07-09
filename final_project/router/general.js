@@ -1,4 +1,5 @@
 const express = require('express');
+const axios = require('axios');
 let books = require("./booksdb.js");
 let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
@@ -42,21 +43,21 @@ public_users.get('/isbn/:isbn', function (req, res) {
   })
 });
 
-// Get book details based on author
-public_users.get('/author/:author', function (req, res) {
-  const { author } = req.params
-  const booksByAuthor = new Promise((resolve, reject) => {
-    setTimeout(() => {
-      resolve(Object.values(books).filter(b => b.author === author))
-    }, 500);
-  })
-
-  booksByAuthor.then(list => {
-    if (list.length > 0)
-      res.send(JSON.stringify(list, null, 4))
-    else
-      res.status(404).send("No books found.")
-  })
+public_users.get('/author/:author', async function (req, res) {
+  try {
+    const { author } = req.params;
+    const response = await axios.get('http://localhost:3000/');
+    const booksData = typeof response.data === 'string' ? JSON.parse(response.data) : response.data;
+    const booksByAuthor = Object.values(booksData).filter(b => b.author === author);
+    
+    if (booksByAuthor.length > 0) {
+      res.send(JSON.stringify(booksByAuthor, null, 4));
+    } else {
+      res.status(404).send("Author not found.");
+    }
+  } catch (error) {
+    res.status(500).send("Error fetching book details.");
+  }
 });
 
 // Get all books based on title
