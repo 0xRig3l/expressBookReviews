@@ -19,40 +19,61 @@ public_users.post("/register", (req, res) => {
 
 // Get the book list available in the shop
 public_users.get('/', function (req, res) {
-  res.send(JSON.stringify(books, null, 4));
+  const bookList = new Promise((resolve, reject) => {
+    setTimeout(() => resolve(JSON.stringify(books, null, 4)), 500)
+  })
+
+  bookList.then(list => res.send(list))
 });
 
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn', function (req, res) {
   const { isbn } = req.params;
-  const book = books[isbn];
+  const book = new Promise((resolve, reject) => {
+    setTimeout(() => resolve(books[isbn]), 500);
+  })
 
-  if (book)
-    res.send(JSON.stringify(book, null, 4))
-  else
-    res.status(404).send("Book not found.")
+  book.then(b => {
+    if (b) {
+      res.send(JSON.stringify(b, null, 4))
+    } else {
+      res.status(404).send("Book not found.")
+    }
+  })
 });
 
 // Get book details based on author
 public_users.get('/author/:author', function (req, res) {
   const { author } = req.params
-  const booksByAuthor = Object.values(books).filter(b => b.author === author)
+  const booksByAuthor = new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(Object.values(books).filter(b => b.author === author))
+    }, 500);
+  })
 
-  if (booksByAuthor.length > 0)
-    res.send(JSON.stringify(booksByAuthor, null, 4))
-  else
-    res.status(404).send("No books found.")
+  booksByAuthor.then(list => {
+    if (list.length > 0)
+      res.send(JSON.stringify(list, null, 4))
+    else
+      res.status(404).send("No books found.")
+  })
 });
 
 // Get all books based on title
 public_users.get('/title/:title', function (req, res) {
   const { title } = req.params;
-  const booksByTitle = Object.values(books).filter(b => b.title === title);
+  const booksByTitle = new Promise((resolve, reject) => {
+    setTimeout(() => {
+      resolve(Object.values(books).filter(b => b.title === title))
+    }, 500);
+  })
 
-  if (booksByTitle.length > 0)
-    res.send(JSON.stringify(booksByTitle, null, 4))
-  else
-    res.status(404).send("Book not found.");
+  booksByTitle.then(list => {
+    if (list.length > 0)
+      res.send(JSON.stringify(list, null, 4))
+    else
+      res.status(404).send("Book not found.");
+  });
 });
 
 //  Get book review
